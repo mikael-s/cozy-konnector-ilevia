@@ -1,12 +1,10 @@
-const fs = require('fs')
-
 const {
   BaseKonnector,
   requestFactory,
   scrape,
   log,
-  utils
 } = require('cozy-konnector-libs')
+
 const request = requestFactory({
   cheerio: true,
   json: false,
@@ -24,9 +22,16 @@ async function start(fields, cozyParameters) {
   //if (cozyParameters) log('debug', 'Found COZY_PARAMETERS')
   await authenticate.bind(this)(fields.login, fields.password)
   log('info', 'Successfully logged in')
-  // The BaseKonnector instance expects a Promise as return of the function
   log('info', 'Fetching the list of documents')
   const $ = await request(`${baseUrl}/fr/historique-commandes`)
+  const invoices = fetchInvoices($)
+  log('info', invoices.length + ' invoice(s) found')
+  if (invoices.length > 0) {
+    await this.saveFiles(invoices, fields, {
+      idenditifiers: ['vendor'], // name of the target website
+      contentType: 'application/pdf'
+    })
+  }
 }
 
 function authenticate(username, password) {
@@ -47,11 +52,28 @@ function authenticate(username, password) {
   })
 }
 
-function writeFile(name, content) {
-  fs.writeFile('./tmp/'+name, content, err => {
-    if (err) {
-      console.error(err)
-      return
-    }
-  })
+function fetchInvoices($) {
+  const invoices = scrape(
+    $,
+    {
+      title: {
+        sel: '.history_link .cart-product__cell a'
+      },
+      date: {
+        sel: '.history_date .cart-product__cell'
+      },
+      fileurl: {
+        sel: '.history_invoice .cart-product__cell a',
+        attr: 'href'
+      },
+      filename: {
+        sel: '.history_link .cart-product__cell a',
+        parse: title => `${title}.pdf`
+      }
+    },
+    '.cart-product__item tr'
+  )
+  const res = invoices
+    .filter(invoice => invoice['fileurl'] != null)
+  return res;
 }
