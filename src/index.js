@@ -12,7 +12,9 @@ const request = requestFactory({
   debug: false
 })
 
-const VENDOR = 'template'
+const moment = require('moment')
+
+const VENDOR = 'Ilévia'
 const baseUrl = 'https://www.ilevia.fr/'
 
 module.exports = new BaseKonnector(start)
@@ -24,11 +26,12 @@ async function start(fields, cozyParameters) {
   log('info', 'Successfully logged in')
   log('info', 'Fetching the list of documents')
   const $ = await request(`${baseUrl}/fr/historique-commandes`)
-  const invoices = fetchInvoices($)
-  log('info', invoices.length + ' invoice(s) found')
-  if (invoices.length > 0) {
-    await this.saveFiles(invoices, fields, {
-      idenditifiers: ['vendor'], // name of the target website
+  const bills = fetchInvoices($)
+  log('info', bills.length + ' bill(s) found')
+  //log('debug', bills)
+  if (bills.length > 0) {
+    await this.saveBills(bills, fields, {
+      idenditifiers: ['Ilévia'], // name of the target website
       contentType: 'application/pdf'
     })
   }
@@ -56,24 +59,49 @@ function fetchInvoices($) {
   const invoices = scrape(
     $,
     {
+      id: {
+        sel: '.history_invoice .cart-product__cell a',
+        attr: 'href',
+        parse: parseId
+      },
       title: {
         sel: '.history_link .cart-product__cell a'
       },
       date: {
-        sel: '.history_date .cart-product__cell'
+        sel: '.history_date .cart-product__cell',
+        parse: date => new Date(date.split('/').reverse().join('/'))
+      },
+      amount: {
+        sel: '.history_price .cart-product__cell span',
+        parse: amount => parseFloat(amount.replace('€', '').trim().replace(',', '.'))
       },
       fileurl: {
         sel: '.history_invoice .cart-product__cell a',
         attr: 'href'
       },
       filename: {
-        sel: '.history_link .cart-product__cell a',
-        parse: title => `${title}.pdf`
+        sel: '.history_link .cart-product__cell a'
+      },
+      vendor: {
+        parse: vendor => VENDOR
+      },
+      currency: {
+        parse: currency => '€'
       }
     },
     '.cart-product__item tr'
   )
-  const res = invoices
-    .filter(invoice => invoice['fileurl'] != null)
-  return res;
+  const res = invoices.filter(invoice => invoice['fileurl'] != null)
+  return res.map(invoice => ({
+    ...invoice,
+    filename: moment(invoice['date']).format('DD-MM-YYYY') + '_' + invoice['title'] + ".pdf"
+  }));
+}
+
+function parseId(id) {
+  if(id) {
+    const res = id.split('=')
+    return res[res.length - 1]
+  }
+  return null
 }
