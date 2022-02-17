@@ -27,7 +27,7 @@ async function start(fields, cozyParameters) {
   log('info', 'Fetching the list of documents')
   const $ = await request(`${baseUrl}/fr/historique-commandes`)
   const bills = fetchInvoices($)
-  log('info', bills.length + ' bill(s) found')
+  //log('info', bills.length + ' bill(s) found')
   //log('debug', bills)
   if (bills.length > 0) {
     await this.saveBills(bills, fields, {
