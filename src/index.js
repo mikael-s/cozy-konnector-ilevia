@@ -29,7 +29,7 @@ async function start(fields, cozyParameters) {
   const bills = fetchInvoices($)
   //log('info', bills.length + ' bill(s) found')
   //log('debug', bills)
-  log('debug',bills)
+  log('info',bills)
   if (bills.length > 0) {
     await this.saveBills(bills, fields, {
       idenditifiers: ['Ilévia'], // name of the target website
