@@ -31,7 +31,7 @@ async function start(fields, cozyParameters) {
   //log('debug', bills)
   log('info',bills)
   if (bills.length > 0) {
-    await this.saveBills(bills, fields, {
+    await this.saveBills(bills, fields.folderPath, {
       idenditifiers: ['Ilévia'], // name of the target website
       contentType: 'application/pdf'
     })
