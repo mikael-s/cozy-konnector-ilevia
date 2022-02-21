@@ -1,13 +1,13 @@
 {
-  "name": "cozy-konnector-template",
+  "name": "cozy-konnector-ilevia",
   "version": "1.0.0",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:konnectors/template.git"
+    "url": "git@github.com:alexperseval/cozy-konnector-ilevia.git"
   },
   "keywords": [],
-  "author": "Cozy Cloud",
+  "author": "Alexandre Perseval",
   "license": "AGPL-3.0",
   "main": "./src/index.js",
   "eslintConfig": {
