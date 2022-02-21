@@ -1,11 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "Ilévia",
   "type": "konnector",
   "language": "node",
   "icon": "icon.png",
   "slug": "ilevia",
-  "source": "git@github.com:konnectors/cozy-konnector-ilevia.git",
+  "source": "git@github.com:alexperseval/cozy-konnector-ilevia.git",
   "editor": "alexperseval",
   "vendor_link": "https://www.ilevia.fr/",
   "categories": ["transport"],
@@ -20,6 +20,7 @@
   "data_types": [
     "bill"
   ],
+  "folders": [{"defaultDir": "$administrative/$konnector/$account"}],
   "screenshots": [],
   "permissions": {
     "bank operations": {
