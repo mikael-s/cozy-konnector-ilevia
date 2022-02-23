@@ -95,7 +95,7 @@ function fetchInvoices($) {
   const res = invoices.filter(invoice => invoice['fileurl'] != null)
   return res.map(invoice => ({
     ...invoice,
-    filename: moment(invoice['date']).format('DD-MM-YYYY') + '_' + invoice['title'] + ".pdf"
+    filename: moment(invoice['date']).format('YYYY-MM-DD') + '_' + invoice['title'] + ".pdf"
   }));
 }
 
