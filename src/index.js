@@ -2,7 +2,7 @@ const {
   BaseKonnector,
   requestFactory,
   scrape,
-  log,
+  log
 } = require('cozy-konnector-libs')
 
 const request = requestFactory({
@@ -21,18 +21,15 @@ module.exports = new BaseKonnector(start)
 
 async function start(fields, cozyParameters) {
   log('info', 'Authenticating ...')
-  //if (cozyParameters) log('debug', 'Found COZY_PARAMETERS')
+  if (cozyParameters) log('debug', 'Found COZY_PARAMETERS')
   await authenticate.bind(this)(fields.login, fields.password)
   log('info', 'Successfully logged in')
   log('info', 'Fetching the list of documents')
   const $ = await request(`${baseUrl}/fr/historique-commandes`)
   const bills = fetchInvoices($)
-  //log('info', bills.length + ' bill(s) found')
-  //log('debug', bills)
-  log('info',bills)
   if (bills.length > 0) {
     await this.saveBills(bills, fields.folderPath, {
-      idenditifiers: ['Ilévia'], // name of the target website
+      identifiers: ['Ilévia'], // name of the target website
       contentType: 'application/pdf'
     })
   }
@@ -48,9 +45,9 @@ function authenticate(username, password) {
       SubmitLogin: true,
       ajax: true,
       login_compte_in_tunnel: 0,
-      choix_mon_compte: "oui"
+      choix_mon_compte: 'oui'
     },
-    validate: (statusCode, $, fullResponse) => {
+    validate: (statusCode) => {
       return statusCode === 200 || log('error', 'Invalid credentials')
     }
   })
@@ -70,11 +67,23 @@ function fetchInvoices($) {
       },
       date: {
         sel: '.history_date .cart-product__cell',
-        parse: date => new Date(date.split('/').reverse().join('/'))
+        parse: date =>
+          new Date(
+            date
+              .split('/')
+              .reverse()
+              .join('/')
+          )
       },
       amount: {
         sel: '.history_price .cart-product__cell span',
-        parse: amount => parseFloat(amount.replace('€', '').trim().replace(',', '.'))
+        parse: amount =>
+          parseFloat(
+            amount
+              .replace('€', '')
+              .trim()
+              .replace(',', '.')
+          )
       },
       fileurl: {
         sel: '.history_invoice .cart-product__cell a',
@@ -84,10 +93,10 @@ function fetchInvoices($) {
         sel: '.history_link .cart-product__cell a'
       },
       vendor: {
-        parse: vendor => VENDOR
+        parse: () => VENDOR
       },
       currency: {
-        parse: currency => '€'
+        parse: () => '€'
       }
     },
     '.cart-product__item tr'
@@ -95,12 +104,16 @@ function fetchInvoices($) {
   const res = invoices.filter(invoice => invoice['fileurl'] != null)
   return res.map(invoice => ({
     ...invoice,
-    filename: moment(invoice['date']).format('YYYY-MM-DD') + '_' + invoice['title'] + ".pdf"
-  }));
+    filename:
+      moment(invoice['date']).format('YYYY-MM-DD') +
+      '_' +
+      invoice['title'] +
+      '.pdf'
+  }))
 }
 
 function parseId(id) {
-  if(id) {
+  if (id) {
     const res = id.split('=')
     return res[res.length - 1]
   }
