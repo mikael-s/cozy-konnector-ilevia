@@ -47,7 +47,7 @@ function authenticate(username, password) {
       login_compte_in_tunnel: 0,
       choix_mon_compte: 'oui'
     },
-    validate: (statusCode) => {
+    validate: statusCode => {
       return statusCode === 200 || log('error', 'Invalid credentials')
     }
   })
